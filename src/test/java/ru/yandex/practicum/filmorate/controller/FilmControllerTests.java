@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 
@@ -27,15 +29,17 @@ public class FilmControllerTests {
     @Test
     void filmIncorrectDataTests() {
         FilmController filmController = new FilmController();
-        filmCompletedContent = new Film(null,null, null,  null, null);
-        ResponseEntity<?> result = filmController.create(filmCompletedContent);
-        Assertions.assertEquals(result.getStatusCode().value(),400, "Ответ сервера должен быть 400 (все поля null)");
-        filmCompletedContent = new Film(null,null, "Вода и только",  LocalDate.of(2000,5,3), 120);
-        result = filmController.create(filmCompletedContent);
-        Assertions.assertEquals(result.getStatusCode().value(),400, "Ответ сервера должен быть 400 (не заполнено поле name)");
-        filmCompletedContent = new Film(null,"Титаник", "Вода и только",  LocalDate.of(1700,5,3), 120);
-        result = filmController.create(filmCompletedContent);
-        Assertions.assertEquals(result.getStatusCode().value(),400, "Ответ сервера должен быть 400 (дата релиза раньше 28 12 1895)");
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
+            filmCompletedContent = new Film(null,null, null,  null, null);
+            filmController.create(filmCompletedContent);
+        });
+        Assertions.assertEquals("Поле не должно быть пустым.", thrown.getMessage());
+    
+        thrown = Assertions.assertThrows(ValidationException.class, () -> {
+            filmCompletedContent = new Film(null,"Титаник", "Вода и только",  LocalDate.of(1700,5,3), 120);
+            filmController.create(filmCompletedContent);
+        });
+        Assertions.assertEquals("Дата релиза — не должна быть раньше 28 декабря 1895 года.", thrown.getMessage());
     }
     
     @Test

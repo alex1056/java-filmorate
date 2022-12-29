@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -12,7 +13,7 @@ public class UserControllerTests {
     User userCompletedContent = null;
     
     @Test
-    void filmCorrectDataTests() {
+    void userCorrectDataTests() {
         UserController userController = new UserController();
         userCompletedContent = new User(null,"asd@asd.ru", "Титаник", "Вася",  LocalDate.of(2000,5,3));
         ResponseEntity<?> result = userController.create(userCompletedContent);
@@ -24,21 +25,24 @@ public class UserControllerTests {
     }
     
     @Test
-    void filmIncorrectDataTests() {
+    void userIncorrectDataTests() {
         UserController userController = new UserController();
-        userCompletedContent = new User(null,null, null,  null, null);
-        ResponseEntity<?> result = userController.create(userCompletedContent);
-        Assertions.assertEquals(result.getStatusCode().value(),400, "Ответ сервера должен быть 400 (все поля null)");
-        userCompletedContent = new User(null,null, "Титаник", "Вася",  LocalDate.of(2000,5,3));
-        result = userController.create(userCompletedContent);
-        Assertions.assertEquals(result.getStatusCode().value(),400, "Ответ сервера должен быть 400 (не заполнено поле email)");
-        userCompletedContent = new User(null,"asd@asd.ru", "Титаник", "Вася",  LocalDate.of(2025,5,3));
-        result = userController.create(userCompletedContent);
-        Assertions.assertEquals(result.getStatusCode().value(),400, "Ответ сервера должен быть 400 (дата рождения не должна быть в будущем)");
+    
+        ValidationException thrown = Assertions.assertThrows(ValidationException.class, () -> {
+            userCompletedContent = new User(null,null, null,  null, null);
+            ResponseEntity<?> result = userController.create(userCompletedContent);
+        });
+        Assertions.assertEquals("Поле не должно быть пустым.", thrown.getMessage());
+
+       thrown = Assertions.assertThrows(ValidationException.class, () -> {
+           userCompletedContent = new User(null,"asd@asd.ru", "Титаник", "Вася",  LocalDate.of(2025,5,3));
+           ResponseEntity<?> result = userController.create(userCompletedContent);
+        });
+        Assertions.assertEquals("Дата рождения — не должна быть в будущем.", thrown.getMessage());
     }
     
     @Test
-    void filmUpdateDataTests() {
+    void userUpdateDataTests() {
         UserController userController = new UserController();
         userCompletedContent = new User(null,"asd@asd.ru", "Титаник", "Вася",  LocalDate.of(2000,5,3));
         ResponseEntity<?> result = userController.create(userCompletedContent);

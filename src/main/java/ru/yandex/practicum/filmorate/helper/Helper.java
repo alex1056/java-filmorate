@@ -9,25 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public class Helper {
-    public static int getNextFilmId(List<Film> films) {
-        Film filmWithMaxId = null;
-        if(films != null && films.size()>0) {
-            filmWithMaxId = films.stream().max(Comparator.comparingInt(Film::getId)).get();
-            return filmWithMaxId.getId() + 1;
-        }
-        return 1;
-    }
-    
-    public static int getNextUserId(Map<Integer,User> users) {
-        if(users != null && users.size() >0) {
-          List<User> usersList = new ArrayList<>(users.values());
-          User userWithMaxId = null;
-          userWithMaxId = usersList.stream().max(Comparator.comparingInt(User::getId)).get();
-          return userWithMaxId.getId() + 1;
-            }
-            return 1;
-        }
-    
     public static boolean isUserEmailExists(User user, Map<Integer,User> users) {
        List<User> usersList = new ArrayList<>(users.values());
        if(usersList.size()>0) {
@@ -37,7 +18,6 @@ public class Helper {
     }
     
     public static boolean isFilmExists(Film film, List<Film> films) {
-        
         if(films.size()>0) {
             return films.stream().filter(currFilm->currFilm.getId() == film.getId()).count() != 0;
         }

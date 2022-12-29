@@ -12,12 +12,15 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.ArrayList;
 import ru.yandex.practicum.filmorate.helper.Helper;
 import ru.yandex.practicum.filmorate.validator.Validator;
+
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 public class FilmController {
     private final List<Film> films = new ArrayList<>();
+    private int currentId = 0;
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
     
     @GetMapping
@@ -26,43 +29,30 @@ public class FilmController {
     }
     
     @PostMapping
-        public ResponseEntity<?> create(@RequestBody Film film) {
+    public ResponseEntity<?> create(@Valid @RequestBody Film film) {
         log.info("Получен POST запрос /film {}",film);
-        try {
-            Validator.filmValidator(film);
-            film.setId(Helper.getNextFilmId(films));
-            films.add(film);
-            return new ResponseEntity<>(film, HttpStatus.OK);
-        } catch(ValidationException e) {
-            log.info("POST запрос /film, ошибка валидации: {}",e.getMessage());
-            ResponseBuilder response = new ResponseBuilder(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
+        Validator.filmValidator(film);
+        film.setId(++currentId);
+        films.add(film);
+        return new ResponseEntity<>(film, HttpStatus.OK);
     }
     
     @PutMapping
-    public ResponseEntity<?> update(@RequestBody Film film) {
-        try {
-            log.info("Получен PUT запрос /film {}", film);
-            Validator.filmValidator(film);
-            Integer id = film.getId();
-            if (id == null) {
-                throw new ValidationException("Нужен фильм id");
-            }
-    
-            if (!Helper.isFilmExists(film, films)) {
-                log.info("Фильм с id: {} не существует!\"", id);
-                ResponseBuilder response = new ResponseBuilder("Фильм с таким id не существует!");
-                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-            }
-    
-            films.removeIf(currFilm -> currFilm.getId() == id);
-            films.add(film);
-            return new ResponseEntity<>(film, HttpStatus.OK);
-        } catch(ValidationException e) {
-            log.info("PUT запрос /film, ошибка валидации: {}",e.getMessage());
-            ResponseBuilder response = new ResponseBuilder(e.getMessage());
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> update(@Valid @RequestBody Film film) {
+        log.info("Получен PUT запрос /film {}", film);
+        Validator.filmValidator(film);
+        Integer id = film.getId();
+        if (id == null) {
+            throw new ValidationException("Нужен фильм id");
         }
+
+        if (!Helper.isFilmExists(film, films)) {
+            log.info("Фильм с id: {} не существует!\"", id);
+            ResponseBuilder response = new ResponseBuilder("Фильм с таким id не существует!");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        films.removeIf(currFilm -> currFilm.getId() == id);
+        films.add(film);
+        return new ResponseEntity<>(film, HttpStatus.OK);
     }
 }
