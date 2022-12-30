@@ -15,9 +15,6 @@ public class Validator {
         {
             throw new ValidationException("Поле не должно быть пустым.");
         }
-        if(film.getDescription() != null && film.getDescription().length() > 200) {
-            throw new ValidationException("Описание не должно быть больше 200 символов.");
-        }
         if(film.getReleaseDate() != null && !film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 28)) ) {
             throw new ValidationException("Дата релиза — не должна быть раньше 28 декабря 1895 года.");
         }
