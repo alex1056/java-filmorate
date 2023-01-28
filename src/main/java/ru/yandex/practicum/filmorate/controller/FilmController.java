@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/films")
@@ -46,8 +47,8 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public ResponseEntity<?> addFriend(@PathVariable Integer id, @PathVariable Integer userId) {
-        Film film = filmService.addLike(id, userId);
+    public ResponseEntity<?> addLike(@PathVariable Integer id, @PathVariable Integer userId) {
+        Optional<Film> film = filmService.addLike(id, userId);
         return new ResponseEntity<>(film, HttpStatus.OK);
     }
 

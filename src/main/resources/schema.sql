@@ -1,0 +1,63 @@
+DROP TABLE IF EXISTS PUBLIC.USERS cascade;
+DROP TABLE IF EXISTS PUBLIC.FRIENDS cascade;
+DROP TABLE IF EXISTS PUBLIC.MPA cascade;
+DROP TABLE IF EXISTS PUBLIC.FILMS cascade;
+DROP TABLE IF EXISTS PUBLIC.LIKES cascade;
+DROP TABLE IF EXISTS PUBLIC.GENRE cascade;
+DROP TABLE IF EXISTS PUBLIC.FILM_GENRE cascade;
+
+CREATE TABLE IF NOT EXISTS PUBLIC.USERS (
+                           	USER_ID INTEGER AUTO_INCREMENT,
+                           	EMAIL CHARACTER(45) NOT NULL,
+                           	LOGIN CHARACTER(45),
+                           	NAME CHARACTER(45),
+                           	BIRTHDAY TIMESTAMP,
+                           	CONSTRAINT USERS_PK PRIMARY KEY (USER_ID),
+                            UNIQUE (EMAIL)
+                           );
+
+CREATE TABLE IF NOT EXISTS PUBLIC.FRIENDS (
+                            FRIEND_ONE INTEGER NOT NULL,
+                            FRIEND_TWO INTEGER NOT NULL,
+                            CONSTRAINT FRIENDS_PK PRIMARY KEY (FRIEND_ONE,FRIEND_TWO),
+                            CONSTRAINT FRIENDS_FK_FRIEND_ONE FOREIGN KEY (FRIEND_ONE) REFERENCES PUBLIC.USERS(USER_ID) ON DELETE CASCADE,
+                            CONSTRAINT FRIENDS_FK_FRIEND_TWO FOREIGN KEY (FRIEND_TWO) REFERENCES PUBLIC.USERS(USER_ID) ON DELETE CASCADE
+                        );
+CREATE TABLE IF NOT EXISTS PUBLIC.MPA (
+                            MPA_ID INTEGER AUTO_INCREMENT,
+                            NAME CHARACTER(5) NOT NULL,
+                            CONSTRAINT MPA_PK PRIMARY KEY (MPA_ID)
+                        );
+
+CREATE TABLE IF NOT EXISTS PUBLIC.FILMS (
+                            FILM_ID INTEGER AUTO_INCREMENT,
+                            NAME CHARACTER(45) NOT NULL,
+                            DESCRIPTION CHARACTER VARYING,
+                            RELEASE_DATE TIMESTAMP,
+                            DURATION INTEGER DEFAULT 0,
+                            MPA_ID INTEGER,
+                            CONSTRAINT FILMS_FK_MPA_ID FOREIGN KEY (MPA_ID) REFERENCES PUBLIC.MPA(MPA_ID) ON DELETE SET NULL,
+                            CONSTRAINT FILMS_PK PRIMARY KEY (FILM_ID)
+                        );
+
+CREATE TABLE IF NOT EXISTS PUBLIC.LIKES (
+                        	LIKE_FILM_ID INTEGER,
+                        	LIKE_USER_ID INTEGER,
+                        	CONSTRAINT LIKES_PK PRIMARY KEY (LIKE_FILM_ID,LIKE_USER_ID),
+                        	CONSTRAINT LIKES_FK_FILM_ID FOREIGN KEY (LIKE_FILM_ID) REFERENCES PUBLIC.FILMS(FILM_ID) ON DELETE CASCADE,
+                        	CONSTRAINT LIKES_FK_USER_ID FOREIGN KEY (LIKE_USER_ID) REFERENCES PUBLIC.USERS(USER_ID) ON DELETE CASCADE
+                        );
+
+CREATE TABLE IF NOT EXISTS PUBLIC.GENRE (
+                            GENRE_ID INTEGER AUTO_INCREMENT,
+                            NAME CHARACTER(45) NOT NULL,
+                            CONSTRAINT GENRE_PK PRIMARY KEY (GENRE_ID)
+                        );
+
+CREATE TABLE IF NOT EXISTS PUBLIC.FILM_GENRE (
+                            FG_FILM_ID INTEGER,
+                            FG_GENRE_ID INTEGER,
+                            CONSTRAINT FILM_GENRE_PK PRIMARY KEY (FG_FILM_ID,FG_GENRE_ID),
+                            CONSTRAINT FILM_GENRE_FK_FILMS_FILM_ID FOREIGN KEY (FG_FILM_ID) REFERENCES PUBLIC.FILMS(FILM_ID) ON DELETE CASCADE,
+                            CONSTRAINT FILM_GENRE_FK_GENRE_GENRE_ID FOREIGN KEY (FG_GENRE_ID) REFERENCES PUBLIC.GENRE(GENRE_ID) ON DELETE CASCADE
+                        );

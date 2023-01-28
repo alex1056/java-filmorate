@@ -31,6 +31,42 @@ public class ErrorHandler {
         return body;
     }
 
+    @ExceptionHandler(MpaNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleMpaNotFoundException(MpaNotFoundException e) {
+        return new ErrorResponse("Mpa не найден: " + e.getMessage());
+    }
+
+    @ExceptionHandler(GenreNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleGengeNotFoundException(GenreNotFoundException e) {
+        return new ErrorResponse("Жанр не найден: " + e.getMessage());
+    }
+
+    @ExceptionHandler(LikeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleLikeException(LikeException e) {
+        return new ErrorResponse("Ошибка добавления лайка: " + e.getMessage());
+    }
+
+    @ExceptionHandler(FilmNotUpdatedException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleFilmUpdateException(FilmNotUpdatedException e) {
+        return new ErrorResponse("Ошибка обновления фильма: " + e.getMessage());
+    }
+
+    @ExceptionHandler(FilmNotCreatedException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleFilmCreationException(FilmNotCreatedException e) {
+        return new ErrorResponse("Ошибка добавления фильма: " + e.getMessage());
+    }
+
+    @ExceptionHandler(FriendException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleFriendException(FriendException e) {
+        return new ErrorResponse("Ошибка добавления/удаления в друзья: " + e.getMessage());
+    }
+
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(ValidationException e) {

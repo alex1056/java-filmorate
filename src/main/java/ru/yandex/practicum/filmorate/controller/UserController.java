@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -32,8 +33,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Integer id) {
-        return userService.getUserById(id);
+    public Optional<User> getUser(@PathVariable Integer id) {
+        return userService.findUserById(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
@@ -54,7 +55,11 @@ public class UserController {
     @PutMapping("/{id}/friends/{friendId}")
     public ResponseEntity<?> addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         User user = userService.addFriend(id, friendId);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        if (user != null) {
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            throw new RuntimeException("Не получается добавить пользователю " + id + " друга с id: " + friendId);
+        }
     }
 
     @PutMapping

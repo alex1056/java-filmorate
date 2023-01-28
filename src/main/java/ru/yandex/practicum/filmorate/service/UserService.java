@@ -2,70 +2,50 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.UserDao;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class UserService {
-    private UserStorage userStorage;
+    private final UserDao userDao;
 
     @Autowired
-    public UserService(InMemoryUserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserService(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     public List<User> findAll() {
-        return userStorage.findAll();
+        return (List<User>) userDao.findAll();
     }
 
     public User addFriend(Integer userId, Integer friendId) {
-        User user = userStorage.getUserById(userId);
-        User friend = userStorage.getUserById(friendId); // проверяем существование друга
-
-        if (user.addFriend(friendId) && friend.addFriend(userId)) {
-            return userStorage.update(user);
-        }
-        throw new RuntimeException("Не получается добавить пользователю " + userId + " друга с id: " + friendId);
+        return userDao.addFriend(userId, friendId);
     }
 
     public User removeFriend(Integer userId, Integer friendId) {
-        User user = userStorage.getUserById(userId);
-        if (user.removeFriend(friendId)) {
-            return userStorage.update(user);
-        }
-        throw new RuntimeException("Не получается удалить у пользователя " + userId + " друга с id: " + friendId);
+        return userDao.removeFriend(userId, friendId);
     }
 
     public List<User> getFriendsList(Integer userId) {
-        User user = userStorage.getUserById(userId);
-        return userStorage.getUsersFromList(user.getFriends());
+        return (List<User>) userDao.getFriendsList(userId);
     }
 
     public List<User> getFriendsIntersection(Integer userId, Integer otherId) {
-        User user = userStorage.getUserById(userId);
-        User otherUser = userStorage.getUserById(otherId);
-        List<Long> intersection = user.getFriends()
-                .stream()
-                .distinct()
-                .filter(otherUser.getFriends()::contains)
-                .collect(Collectors.toList());
-        return userStorage.getUsersFromList(intersection);
+        return (List<User>) userDao.getFriendsIntersection(userId, otherId);
     }
 
-    public User getUserById(Integer userId) {
-        return userStorage.getUserById(userId);
+    public Optional<User> findUserById(Integer id) {
+        return userDao.findUserById(id);
     }
 
-    public User createUser(User user) {
-        return userStorage.add(user);
+    public Optional<User> createUser(User user) {
+        return userDao.addUser(user);
     }
 
-    public User updateUser(User user) {
-        return userStorage.update(user);
+    public Optional<User> updateUser(User user) {
+        return userDao.updateUser(user);
     }
-
 }
