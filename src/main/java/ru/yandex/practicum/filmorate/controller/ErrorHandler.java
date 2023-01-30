@@ -2,12 +2,12 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.filmorate.exception.*;
+import ru.yandex.practicum.filmorate.helper.ErrorResponse;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,15 +62,3 @@ public class ErrorHandler {
     }
 }
 
-class ErrorResponse {
-    String error;
-
-    public ErrorResponse(String error) {
-        this.error = error;
-
-    }
-
-    public String getError() {
-        return error;
-    }
-}

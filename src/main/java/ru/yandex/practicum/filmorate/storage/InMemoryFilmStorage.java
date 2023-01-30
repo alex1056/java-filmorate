@@ -11,25 +11,32 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.validator.Validator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-    private final List<Film> films = new ArrayList<>();
+    private final HashMap<Integer, Film> films = new HashMap<>();
     private int currentId = 0;
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
 
     @Override
     public List<Film> findAll() {
-        return films;
+        List<Film> filmsList = new ArrayList<>();
+
+        for (Integer id : films.keySet()) {
+            Film currFilm = films.get(id);
+            filmsList.add(currFilm);
+        }
+        return filmsList;
     }
 
     @Override
     public Film add(Film film) {
         Validator.filmValidator(film);
         film.setId(++currentId);
-        films.add(film);
+        films.put(currentId, film);
         return film;
     }
 
@@ -45,23 +52,23 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.info("Фильм с id: {} не существует!\"", id);
             throw new FilmNotFoundException("Фильм с id: {" + id + "} не существует!");
         }
-        films.removeIf(currFilm -> currFilm.getId() == id);
-        films.add(film);
+        films.remove(film.getId());
+        films.put(film.getId(), film);
         return film;
     }
 
     @Override
     public Film getFilmById(Integer filmId) {
-        return films.stream()
-                .filter(film -> film.getId().equals(filmId))
-                .findFirst()
-                .orElseThrow(() -> new FilmNotFoundException("Фильм с id: {" + filmId + "} не существует!"));
+        Film film = films.get(filmId);
+        if (film != null) {
+            return film;
+        }
+        throw new FilmNotFoundException("Фильм с id: {" + filmId + "} не существует!");
     }
 
     @Override
     public List<Film> getPopular(Integer count) {
-        return films.stream()
-                .sorted((p0, p1) -> -1 * (p0.getLikes().size() - p1.getLikes().size()))
+        return films.values().stream().sorted((p0, p1) -> -1 * (p0.getLikes().size() - p1.getLikes().size()))
                 .skip(0) // beginning index 0
                 .limit(count)
                 .collect(Collectors.toList());
@@ -79,7 +86,6 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.info("Фильм с id: {} не существует!\"", id);
             throw new FilmNotFoundException("Фильм с id: {" + id + "} не существует!");
         }
-        films.removeIf(currFilm -> currFilm.getId() == id);
-        return film;
+        return films.remove(id);
     }
 }
