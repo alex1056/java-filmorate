@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.dao.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmDao;
@@ -13,8 +15,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -62,39 +66,27 @@ public class FilmDaoImpl implements FilmDao {
 
     @Override
     public Optional<Film> addFilm(Film film) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         Integer mpaId = film.getMpa().getId();
         mpaDao.findMpaById(mpaId);
-        String sql = "INSERT INTO films (name,description,release_date,duration, mpa_id) VALUES (?,?,?,?,?)";
-        jdbcTemplate.update(sql,
-                film.getName(),
-                film.getDescription(),
-                film.getReleaseDate(),
-                film.getDuration(),
-                mpaId
-        );
-
-        sql = "SELECT f.FILM_ID, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, f.MPA_ID, m.NAME\n" +
-                "FROM FILMS f  \n" +
-                "LEFT JOIN MPA AS m ON m.MPA_ID = f.MPA_ID\n" +
-                "WHERE f.name=? AND f.description=?";
-        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql, film.getName(), film.getDescription());
-        Film filmResult;
-        if (filmRows.next()) {
-            Integer filmIdResult = filmRows.getInt("film_id");
-            filmGenreDao.setFilmGenges(filmIdResult, film.getGenres());
-            filmResult = new Film(
-                    filmIdResult,
-                    Helper.trimNullableString(filmRows.getString("name")),
-                    Helper.trimNullableString(filmRows.getString("description")),
-                    filmRows.getDate("release_date").toLocalDate(),
-                    filmRows.getInt("duration"),
-                    new Mpa(filmRows.getInt("MPA_ID"), Helper.trimNullableString(filmRows.getString(7))),
-                    (List<Genre>) filmGenreDao.getFilmGengeIdsByFilmId(filmIdResult),
-                    likeDao.findLikes(filmIdResult)
-            );
-            return Optional.of(filmResult);
+        final String sql = "INSERT INTO films (name,description,release_date,duration, mpa_id) VALUES (?,?,?,?,?)";
+        
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection
+                    .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, film.getName());
+            ps.setString(2, film.getDescription());
+            ps.setString(3, film.getReleaseDate().toString());
+            ps.setString(4, film.getDuration().toString());
+            ps.setString(5, String.valueOf(mpaId));
+            return ps;
+        }, keyHolder);
+        Integer filmId = (Integer) keyHolder.getKey();
+        if (filmId != null) {
+            filmGenreDao.setFilmGenges(filmId, film.getGenres());
+            return getFilmById(filmId);
         }
-        return Optional.empty();
+        return null;
     }
 
     @Override
