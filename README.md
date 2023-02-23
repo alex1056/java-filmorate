@@ -1,6 +1,6 @@
 # Filmorate project
 
-![Схема таблиц БД](src/main/resources/db.png)
+![Схема таблиц БД](src/main/resources/DB-scheme.png)
 
 ### Первичные ключи /внешние ключи в таблицах /уточнения
 
@@ -10,18 +10,18 @@
 
 #### Friends
 
-- friend_one - PK, FK_user_id
-- friend_two - PK, FK_user_id
-- status - ENUM('0','1','2'), 0 - в ожидании, 1 - запрос дружбы, 2 - подтверждение дружбы
+- friend_one - PK, FK >- User.user_id
+- friend_two - PK, FK >- User.user_id
 
 #### Film
 
-- film_id - PK
+- film_id - PK,
+- mpa_id int FK >- Mpa.mpa_id
 
 #### Likes
 
-- film_id - PK, FK_film_id
-- user_id - PK, FK_user_id
+- film_id - PK, FK >- Film.film_id
+- user_id - PK, FK >- User.user_id
 
 #### Genre
 
@@ -29,15 +29,12 @@
 
 #### Film_genre
 
-- film_id - PK, FK_film_film_id
-- genre_id - PK, FK_genre_genre_id
+- film_id - PK, FK  >- Film.film_id
+- genre_id - PK, FK  >- Genre.genre_id
 
-### Отношения между таблицами / полями
+#### Mpa
 
-Таблица User относится к таблице Friends как один ко многим.
-Таблица Film относится к таблице Likes как один ко многим.
-Таблица Film относится к таблице Film_genre как один ко многим.
-Таблица Genre относится к таблице Film_genre как один ко многим.
+- mpa_id PK
 
 ### Примеры запросов
 
@@ -50,7 +47,6 @@ u.user_name,
 COUNT(f.friend_two) AS friends
 FROM User
 LEFT JOIN Friends AS f ON f.friend_one = u.user_id
-WHERE f.status = '2' -- Дружба подтверждена
 GROUP BY f.friend_two
 `
 

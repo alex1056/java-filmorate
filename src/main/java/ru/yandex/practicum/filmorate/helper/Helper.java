@@ -21,4 +21,9 @@ public class Helper {
         }
         return false;
     }
+
+    public static String trimNullableString(String string) {
+        return string == null ? null : string.trim();
+    }
+
 }

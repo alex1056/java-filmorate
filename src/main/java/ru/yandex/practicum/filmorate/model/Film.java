@@ -1,19 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.validation.constraints.*;
 
-
+@Builder
 @Getter
 @Setter
 @ToString
@@ -32,26 +26,18 @@ public class Film {
     private LocalDate releaseDate;
     @Min(1)
     private Integer duration;
-    private Set<Long> likes;
+    private Mpa mpa;
+    private List<Genre> genres;
+    private List<Integer> likes;
 
-    public Film(Integer id, String name, String description, LocalDate releaseDate, Integer duration) {
+    public Film(Integer id, String name, String description, LocalDate releaseDate, Integer duration, Mpa mpa, List<Genre> genre, List<Integer> likes) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-        this.likes = new HashSet<>();
-    }
-
-    public List<Long> getLikes() {
-        return likes.stream().collect(Collectors.toList());
-    }
-
-    public boolean addLike(Long userId) {
-        return likes.add(userId);
-    }
-
-    public boolean removeLike(Integer userId) {
-        return likes.remove((long) userId);
+        this.mpa = mpa;
+        this.genres = genre;
+        this.likes = likes;
     }
 }
